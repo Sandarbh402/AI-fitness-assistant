@@ -117,6 +117,11 @@ const Onboarding = () => {
           </div>
 
           <div className="input-group">
+            <label className="input-label">Target Weight (kg)</label>
+            <input type="number" name="targetWeight" className="input-field" value={formData.targetWeight} onChange={handleChange} required placeholder="70" style={{ fontWeight: 600 }} />
+          </div>
+
+          <div className="input-group">
             <label className="input-label">Height (cm)</label>
             <input type="number" name="height" className="input-field" value={formData.height} onChange={handleChange} required placeholder="180" style={{ fontWeight: 600 }} />
           </div>

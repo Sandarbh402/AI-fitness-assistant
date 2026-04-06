@@ -7,6 +7,7 @@ const profileSchema = new mongoose.Schema({
   initialWeight: { type: Number, required: true },
   currentWeight: { type: Number, required: true },
   height: { type: Number, required: true },
+  targetWeight: { type: Number, required: true },
   weightGoal: { type: String, required: true },
   activityLevel: { type: String, required: true },
   gymFrequency: { type: Number, required: true },

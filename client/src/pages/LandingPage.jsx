@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Zap, ArrowRight, Brain, BarChart2, Target, Menu, X, Star, Check } from 'lucide-react';
+import heroImage from '../assets/hero-gym.png';
 
 /* ── Typewriter hook ── */
 /* 
@@ -204,21 +205,36 @@ const LandingPage = () => {
         padding: '120px 24px 80px',
         position: 'relative',
         overflow: 'hidden',
+        backgroundImage: `url(${heroImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
       }}>
+        {/* Blurred background overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(255, 255, 255, 0.45)',
+          backdropFilter: 'blur(0.25px)',
+          WebkitBackdropFilter: 'blur(0.25px)',
+          zIndex: 0
+        }} />
+
         {/* Background orbs */}
         <div style={{
           position: 'absolute', width: 600, height: 600,
           background: 'radial-gradient(circle, rgba(192, 57, 43, 0.08) 0%, transparent 70%)',
           top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
           pointerEvents: 'none',
+          zIndex: 1
         }} />
         <div style={{
           position: 'absolute', width: 400, height: 400,
           background: 'radial-gradient(circle, rgba(184, 134, 11, 0.05) 0%, transparent 70%)',
           top: '20%', right: '10%', pointerEvents: 'none',
+          zIndex: 1
         }} />
 
-        <div style={{ position: 'relative', maxWidth: 800, animation: 'fadeIn 0.8s ease-out' }}>
+        <div style={{ position: 'relative', maxWidth: 800, animation: 'fadeIn 0.8s ease-out', zIndex: 2 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             background: 'var(--primary-light)', border: '1px solid rgba(192, 57, 43, 0.2)',
@@ -232,9 +248,10 @@ const LandingPage = () => {
           <h1 className="heading-xl" style={{
             minHeight: '5rem',
             fontStyle: 'italic',
-            color: 'var(--text-main)',
+            color: '#1C1917', // Warm Walnut Black
             letterSpacing: '-0.02em',
             marginBottom: 0,
+            textShadow: '0 2px 4px rgba(0,0,0,0.03)',
           }}>
             <span className="gradient-text">{displayed}</span>
             <span style={{
@@ -246,10 +263,11 @@ const LandingPage = () => {
 
           <p style={{
             fontSize: '1.2rem',
-            color: 'var(--text-muted)',
+            color: '#44403C', // Warm Stone Grey
             margin: '32px auto',
             maxWidth: 560,
             lineHeight: 1.7,
+            fontWeight: 500,
           }}>
             Your AI personal trainer and nutritionist — in one app. Get a plan built for <em>your</em> body,
             track daily progress, and let the AI adapt your program as you grow.

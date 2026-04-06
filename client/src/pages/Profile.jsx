@@ -5,29 +5,40 @@ import { User, Mail, Shield, Save, Camera, PencilLine, Ruler, Scale, Target } fr
 
 const Profile = () => {
   const { user, setUser } = useContext(AuthContext);
-  const [form, setForm] = useState({ name: '', email: '', height: '', weightGoal: '' });
+  const [form, setForm] = useState({
+    name: '', email: '', height: '', weight: '', targetWeight: '', weightGoal: '', age: '', activityLevel: '', gymFrequency: '', splitPreference: ''
+  });
   const [passForm, setPassForm] = useState({ oldPassword: '', newPassword: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/auth/me', {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
+        const [authRes, profileRes] = await Promise.all([
+          fetch('/api/auth/me', { headers: { Authorization: `Bearer ${user.token}` } }),
+          fetch('/api/profile', { headers: { Authorization: `Bearer ${user.token}` } })
+        ]);
+
+        if (authRes.ok && profileRes.ok) {
+          const uData = await authRes.json();
+          const pData = await profileRes.json();
           setForm({
-            name: data.name || '',
-            email: data.email || '',
-            height: data.height || '',
-            weightGoal: data.weightGoal || 'maintain',
+            name: uData.name || '',
+            email: uData.email || '',
+            height: pData.height || '',
+            weight: pData.currentWeight || '',
+            targetWeight: pData.targetWeight || '',
+            weightGoal: pData.weightGoal || 'maintain',
+            age: pData.age || '',
+            activityLevel: pData.activityLevel || 'moderate',
+            gymFrequency: pData.gymFrequency || 3,
+            splitPreference: pData.splitPreference || 'push/pull/legs'
           });
         }
       } catch (err) { console.error(err); }
     };
-    fetchProfile();
+    fetchData();
   }, [user.token]);
 
   const handleUpdateProfile = async (e) => {
@@ -35,20 +46,48 @@ const Profile = () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
     try {
-      const res = await fetch('/api/auth/me', {
+      // 1. Update User Basic Info
+      const userRes = await fetch('/api/auth/me', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ name: form.name, email: form.email }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        setUser({ ...user, name: data.name, email: data.email });
-        setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      } else throw new Error(data.message || 'Update failed');
-    } catch (err) { setMessage({ type: 'error', text: err.message }); } finally { setLoading(false); }
+
+      // 2. Update Profile Fitness Info
+      const profRes = await fetch('/api/profile', {
+        method: 'POST', // POST handles create/update in this app
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          age: form.age,
+          height: form.height,
+          weight: form.weight,
+          targetWeight: form.targetWeight,
+          weightGoal: form.weightGoal,
+          activityLevel: form.activityLevel,
+          gymFrequency: form.gymFrequency,
+          splitPreference: form.splitPreference,
+          gender: 'male' // Default or retrieved from profile
+        }),
+      });
+
+      if (userRes.ok && profRes.ok) {
+        const updatedUser = await userRes.json();
+        setUser({ ...user, name: updatedUser.name, email: updatedUser.email });
+        setMessage({ type: 'success', text: 'Profile and fitness objectives updated!' });
+      } else {
+        throw new Error('Failed to update some fields');
+      }
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const initials = form.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?';
@@ -112,6 +151,15 @@ const Profile = () => {
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--orange-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Scale size={16} color="var(--orange)" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-subtle)' }}>WEIGHT</div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700 }}>{form.weight} kg</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Target size={16} color="var(--primary)" />
                   </div>
@@ -144,15 +192,57 @@ const Profile = () => {
                   <input type="email" className="input-field" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required style={{ fontWeight: 600 }} />
                 </div>
                 <div className="input-group">
+                  <label className="input-label">Age</label>
+                  <input type="number" className="input-field" value={form.age} onChange={e => setForm({...form, age: e.target.value})} style={{ fontWeight: 600 }} />
+                </div>
+                <div className="input-group">
                   <label className="input-label">Height (cm)</label>
                   <input type="number" className="input-field" value={form.height} onChange={e => setForm({...form, height: e.target.value})} style={{ fontWeight: 600 }} />
                 </div>
                 <div className="input-group">
+                  <label className="input-label">Current Weight (kg)</label>
+                  <input type="number" className="input-field" value={form.weight} onChange={e => setForm({...form, weight: e.target.value})} style={{ fontWeight: 600 }} />
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Target Weight (kg)</label>
+                  <input type="number" className="input-field" value={form.targetWeight} onChange={e => setForm({...form, targetWeight: e.target.value})} style={{ fontWeight: 600 }} />
+                </div>
+                <div className="input-group">
                   <label className="input-label">Weight Goal</label>
                   <select className="input-field" value={form.weightGoal} onChange={e => setForm({...form, weightGoal: e.target.value})} style={{ fontWeight: 600 }}>
-                    <option value="lose">Lose Weight</option>
+                    <option value="lose weight">Lose Weight</option>
                     <option value="maintain">Maintain</option>
-                    <option value="gain">Gain Muscle</option>
+                    <option value="gain muscle">Gain Muscle</option>
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Gender</label>
+                  <select className="input-field" value={form.gender} onChange={e => setForm({...form, gender: e.target.value})} style={{ fontWeight: 600 }}>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Activity Level</label>
+                  <select className="input-field" value={form.activityLevel} onChange={e => setForm({...form, activityLevel: e.target.value})} style={{ fontWeight: 600 }}>
+                    <option value="sedentary">Sedentary</option>
+                    <option value="light">Lightly Active</option>
+                    <option value="moderate">Moderately Active</option>
+                    <option value="very">Very Active</option>
+                  </select>
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Gym Sessions / Week</label>
+                  <input type="number" className="input-field" value={form.gymFrequency} onChange={e => setForm({...form, gymFrequency: e.target.value})} min="1" max="7" style={{ fontWeight: 600 }} />
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Routine Split</label>
+                  <select className="input-field" value={form.splitPreference} onChange={e => setForm({...form, splitPreference: e.target.value})} style={{ fontWeight: 600 }}>
+                    <option value="push/pull/legs">Push / Pull / Legs</option>
+                    <option value="upper/lower">Upper / Lower</option>
+                    <option value="bro split">Bro Split</option>
+                    <option value="full body">Full Body</option>
                   </select>
                 </div>
               </div>

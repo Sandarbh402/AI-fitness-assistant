@@ -31,7 +31,8 @@ Client Profile:
 - Name: ${userName}
 - Age: ${profile.age}, Gender: ${profile.gender}
 - Current Weight: ${profile.currentWeight}kg, Height: ${profile.height}cm
-- Goal: ${profile.weightGoal}
+- Target Weight: ${profile.targetWeight}kg
+- Goal Type: ${profile.weightGoal}
 - Activity Level: ${profile.activityLevel}
 - Gym Frequency: ${profile.gymFrequency} days/week
 - Preferred Split: ${profile.splitPreference}
@@ -136,7 +137,8 @@ router.post('/weekly', protect, async (req, res) => {
     const prompt = `You are an expert fitness and nutrition coach reviewing a client's weekly progress.
 
 Client: ${userName}
-Goal: ${profile.weightGoal}
+Goal Type: ${profile.weightGoal}
+Target Weight: ${profile.targetWeight}kg
 Starting Weight: ${profile.currentWeight}kg | 7-Day Average Weight: ${avgWeight}kg (${changeDirection} ${Math.abs(weightChange)}kg)
 Workouts Completed: ${totalWorkouts}/${profile.gymFrequency} (target per week)
 Avg Daily Calories: ${avgCal} kcal | Avg Daily Protein: ${avgPro}g

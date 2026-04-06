@@ -7,7 +7,7 @@ const { protect } = require('../middleware/authMiddleware');
 // @desc    Create or update user profile
 // @access  Private
 router.post('/', protect, async (req, res) => {
-  const { age, gender, weight, height, weightGoal, activityLevel, gymFrequency, splitPreference } = req.body;
+  const { age, gender, weight, targetWeight, height, weightGoal, activityLevel, gymFrequency, splitPreference } = req.body;
 
   try {
     let profile = await Profile.findOne({ user: req.user._id });
@@ -17,6 +17,7 @@ router.post('/', protect, async (req, res) => {
       profile.age = age;
       profile.gender = gender;
       profile.currentWeight = weight;
+      profile.targetWeight = targetWeight;
       profile.height = height;
       profile.weightGoal = weightGoal;
       profile.activityLevel = activityLevel;
@@ -33,6 +34,7 @@ router.post('/', protect, async (req, res) => {
       gender,
       initialWeight: weight,
       currentWeight: weight,
+      targetWeight,
       height,
       weightGoal,
       activityLevel,
