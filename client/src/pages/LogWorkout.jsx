@@ -44,7 +44,7 @@ const LogWorkout = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${user.token}`,
         },
-        body: JSON.stringify({ isRestDay, exercises: isRestDay ? [] : exercises }),
+        body: JSON.stringify({ isRay, exercises: isRestDestDay ? [] : exercises }),
       });
       if (res.ok) {
         setMessage('Workout logged successfully! 💪');
